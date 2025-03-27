@@ -3,528 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Optimizer</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Resume Optimizer Test</title>
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-light: #f9fafb;
-            --text-light: #1f2937;
-            --card-light: #ffffff;
-            --border-light: #e5e7eb;
-            
-            --bg-dark: #111827;
-            --text-dark: #f3f4f6;
-            --card-dark: #1f2937;
-            --border-dark: #374151;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
-        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            background-color: var(--bg-light);
-            color: var(--text-light);
-        }
-        
-        body.dark-mode {
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
-        
-        .header {
+            font-family: Arial, sans-serif;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-light);
+            height: 100vh;
+            margin: 0;
         }
-        
-        .dark-mode .header {
-            border-bottom: 1px solid var(--border-dark);
+        #progress-panel {
+            width: 30%;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
         }
-        
-        .title {
-            font-size: 1.8rem;
-            font-weight: 700;
+        #content-panel {
+            width: 70%;
+            padding: 20px;
+            overflow-y: auto;
         }
-        
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--text-light);
-            padding: 0.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .dark-mode .theme-toggle {
-            color: var(--text-dark);
-        }
-        
-        .card {
-            background-color: var(--card-light);
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-light);
-        }
-        
-        .dark-mode .card {
-            background-color: var(--card-dark);
-            border: 1px solid var(--border-dark);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 15px;
         }
-        
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-        
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.95rem;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
-        
-        .file-input-container {
-            position: relative;
-            margin-bottom: 0.5rem;
-        }
-        
-        .file-input-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            background-color: var(--bg-light);
-            border: 1px dashed var(--border-light);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
+        input[type="file"], textarea, input[type="text"] {
             width: 100%;
-            font-weight: 500;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 5px;
         }
-        
-        .dark-mode .file-input-button {
-            background-color: var(--bg-dark);
-            border: 1px dashed var(--border-dark);
-        }
-        
-        .file-input-button:hover {
-            background-color: rgba(99, 102, 241, 0.05);
-        }
-        
-        .file-input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            font-size: 0.875rem;
-            padding: 0.5rem 0.75rem;
-            background-color: rgba(99, 102, 241, 0.1);
-            border-radius: 0.375rem;
-            color: var(--primary);
-            display: none;
-        }
-        
-        .dark-mode .file-info {
-            background-color: rgba(99, 102, 241, 0.2);
-        }
-        
-        .file-info.visible {
-            display: flex;
-        }
-        
-        .file-help-text {
-            font-size: 0.825rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-        }
-        
-        .dark-mode .file-help-text {
-            color: #9ca3af;
-        }
-        
         textarea {
-            width: 100%;
-            padding: 0.75rem;
-            font-size: 0.95rem;
-            border: 1px solid var(--border-light);
-            border-radius: 0.5rem;
-            min-height: 120px;
-            background-color: var(--bg-light);
-            color: var(--text-light);
-            font-family: inherit;
-            resize: vertical;
+            min-height: 100px;
         }
-        
-        .dark-mode textarea {
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-dark);
-            color: var(--text-dark);
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-        
-        button.submit-btn {
-            background-color: var(--primary);
+        button {
+            background-color: #4CAF50;
             color: white;
+            padding: 10px 15px;
             border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
         }
-        
-        button.submit-btn:hover {
-            background-color: var(--primary-hover);
+        button:hover {
+            background-color: #45a049;
         }
-        
-        button.submit-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        #result {
-            min-height: 150px;
-            margin-top: 0.5rem;
-            white-space: pre-wrap;
-            font-family: monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            overflow: auto;
+        #analysis-results, #optimization-results {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap; /* Preserve formatting */
             max-height: 400px;
-            background-color: var(--bg-light);
-            color: var(--text-light);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-light);
+            overflow-y: auto;
         }
-        
-        .dark-mode #result {
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
-            border: 1px solid var(--border-dark);
+        .file-upload-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-right: 0.5rem;
-            display: none;
+        #step2-form {
+            display: none; /* Hidden initially */
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .progress-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed #ccc;
         }
-        
-        .result-card.processing .loading-spinner {
-            display: inline-block;
+        .progress-item.complete {
+            color: green;
+            font-weight: bold;
         }
-        
-        @media (max-width: 640px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .card {
-                padding: 1.25rem;
-            }
-            
-            .title {
-                font-size: 1.5rem;
-            }
+        .progress-item.error {
+            color: red;
+            font-weight: bold;
         }
-        
-        .canvas-container {
-            margin-top: 2rem;
-            border-radius: 0.75rem;
-            overflow: hidden;
-        }
-        
-        .canvas-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .section-subtitle {
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0;
-        }
-        
-        .download-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-        
-        .download-btn:hover {
-            background-color: var(--primary-hover);
-        }
-        
-        canvas {
-            width: 100%;
-            height: auto;
-            max-height: none;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-light);
-            background-color: var(--card-light);
-        }
-        
-        .dark-mode canvas {
-            border: 1px solid var(--border-dark);
-            background-color: var(--card-dark);
+        h1, h2, h3 {
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">Resume Optimizer</h1>
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                <i class="fas fa-moon"></i>
-            </button>
-        </header>
-        
-        <div class="card">
-            <h2 class="section-title">
-                <i class="fas fa-file-alt"></i>
-                Upload Documents
-            </h2>
-            
-            <form id="resumeForm">
-                <div class="form-group">
-                    <label for="resume">Resume (PDF/Word)</label>
-                    <div class="file-input-container">
-                        <div class="file-input-button" id="resumeButton">
-                            <i class="fas fa-upload"></i>
-                            <span>Choose resume file or drag & drop</span>
-                        </div>
-                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required class="file-input">
-                    </div>
-                    <div class="file-info" id="resumeInfo">
-                        <i class="fas fa-file-pdf"></i>
-                        <span id="resumeFileName">No file chosen</span>
-                    </div>
-                    <p class="file-help-text">Accepted formats: PDF, DOC, DOCX</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="job_description">Job Description (Text File)</label>
-                    <div class="file-input-container">
-                        <div class="file-input-button" id="jobDescButton">
-                            <i class="fas fa-upload"></i>
-                            <span>Choose job description file or drag & drop</span>
-                        </div>
-                        <input type="file" id="job_description" name="job_description" accept=".txt" class="file-input">
-                    </div>
-                    <div class="file-info" id="jobDescInfo">
-                        <i class="fas fa-file-alt"></i>
-                        <span id="jobDescFileName">No file chosen</span>
-                    </div>
-                    <p class="file-help-text">Upload a .txt file containing the job description</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="additional_info">Additional Information</label>
-                    <textarea id="additional_info" name="additional_info" placeholder="Share any other details about yourself or your career goals..."></textarea>
-                </div>
-                
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span class="loading-spinner" id="spinner"></span>
-                    <i class="fas fa-magic"></i>
-                    Optimize Resume
-                </button>
-            </form>
+    <div id="progress-panel">
+        <h2>Progress</h2>
+        <div id="progress-log">
+            <div class="progress-item">Waiting to start...</div>
         </div>
-        
-        <div class="card result-card" id="resultCard">
-            <h2 class="section-title">
-                <i class="fas fa-lightbulb"></i>
-                Optimization Results
-            </h2>
-            <div id="result">Results will appear here...</div>
-            
-            <div id="canvas-container" class="canvas-container" style="display: none; margin-top: 1.5rem;">
-                <div class="canvas-header">
-                    <h3 class="section-subtitle">
-                        <i class="fas fa-image"></i>
-                        Resume Visualization
-                    </h3>
-                    <button id="download-btn" class="download-btn">
-                        <i class="fas fa-download"></i>
-                        Download Image
-                    </button>
+    </div>
+
+    <div id="content-panel">
+        <!-- Step 1: Analyze Resume -->
+        <div id="step1">
+            <h1>Step 1: Analyze Resume</h1>
+            <form id="analyzeForm">
+                <div class="form-group">
+                    <label for="resume">Upload Resume (PDF/Word):</label>
+                    <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                        </div>
+                <button type="submit">Analyze Resume</button>
+            </form>
+            <div id="analysis-results-container" style="display: none;">
+                <h3>Analysis Results:</h3>
+                <div id="analysis-results"></div>
+                    </div>
+                    </div>
+
+        <!-- Step 2: Provide Answers and Optimize -->
+        <div id="step2-form">
+            <h2>Step 2: Provide Answers & Optimize</h2>
+            <form id="optimizeForm">
+                <input type="hidden" id="resume_analysis_key" name="resume_analysis_key">
+
+                <div class="form-group">
+                    <label for="answers">Answers to Questions:</label>
+                    <textarea id="answers" name="answers" placeholder="Provide answers to the questions generated in Step 1..." required></textarea>
                 </div>
-                <canvas id="resume-canvas" width="800" height="1600"></canvas>
+                
+                <div class="form-group">
+                    <label for="job_description">Job Description (Optional Text File):</label>
+                    <input type="file" id="job_description" name="job_description" accept=".txt">
+                    <div class="file-upload-info">Upload a .txt file containing the job description</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="additional_info">Additional Information (Optional):</label>
+                    <textarea id="additional_info" name="additional_info" placeholder="Any other relevant information about yourself..."></textarea>
+                </div>
+                
+                <button type="submit">Optimize Resume</button>
+            </form>
+            <div id="optimization-results-container" style="display: none;">
+                <h3>Optimization Results:</h3>
+                <div id="optimization-results"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Dark mode toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = themeToggle.querySelector('i');
-        
-        // Check for saved theme preference
-        if (localStorage.getItem('darkMode') === 'enabled' || 
-            (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('darkMode'))) {
-            document.body.classList.add('dark-mode');
-            themeIcon.classList.replace('fa-moon', 'fa-sun');
-        }
-        
-        themeToggle.addEventListener('click', () => {
-            if (document.body.classList.contains('dark-mode')) {
-                document.body.classList.remove('dark-mode');
-                themeIcon.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('darkMode', 'disabled');
-            } else {
-                document.body.classList.add('dark-mode');
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('darkMode', 'enabled');
+        const analyzeForm = document.getElementById('analyzeForm');
+        const optimizeForm = document.getElementById('optimizeForm');
+        const progressLog = document.getElementById('progress-log');
+        const analysisResultsContainer = document.getElementById('analysis-results-container');
+        const analysisResultsDiv = document.getElementById('analysis-results');
+        const optimizationResultsContainer = document.getElementById('optimization-results-container');
+        const optimizationResultsDiv = document.getElementById('optimization-results');
+        const step2FormDiv = document.getElementById('step2-form');
+        const resumeAnalysisKeyInput = document.getElementById('resume_analysis_key');
+        const answersTextarea = document.getElementById('answers'); // Get the answers textarea
+
+        function logProgress(message, type = 'info') {
+            const item = document.createElement('div');
+            item.classList.add('progress-item');
+            item.textContent = message;
+            if (type === 'complete') {
+                item.classList.add('complete');
+            } else if (type === 'error') {
+                item.classList.add('error');
             }
-        });
-        
-        // File input enhancements
-        function setupFileInput(inputId, infoId, fileNameId, buttonId) {
-            const input = document.getElementById(inputId);
-            const info = document.getElementById(infoId);
-            const fileName = document.getElementById(fileNameId);
-            const button = document.getElementById(buttonId);
-            
-            input.addEventListener('change', () => {
-                if (input.files.length > 0) {
-                    fileName.textContent = input.files[0].name;
-                    info.classList.add('visible');
-                } else {
-                    info.classList.remove('visible');
-                }
-            });
-            
-            // Highlight on drag over
-            button.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                button.style.borderColor = 'var(--primary)';
-                button.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
-            });
-            
-            button.addEventListener('dragleave', () => {
-                button.style.borderColor = '';
-                button.style.backgroundColor = '';
-            });
-            
-            button.addEventListener('drop', () => {
-                button.style.borderColor = '';
-                button.style.backgroundColor = '';
-            });
+            // Prepend to show latest first
+            progressLog.insertBefore(item, progressLog.firstChild);
         }
-        
-        setupFileInput('resume', 'resumeInfo', 'resumeFileName', 'resumeButton');
-        setupFileInput('job_description', 'jobDescInfo', 'jobDescFileName', 'jobDescButton');
-        
-        // Form submission handling
-        document.getElementById('resumeForm').addEventListener('submit', async function(e) {
+
+        // --- Step 1: Analyze Resume ---
+        analyzeForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const spinner = document.getElementById('spinner');
-            const resultDiv = document.getElementById('result');
-            const resultCard = document.getElementById('resultCard');
-            const canvasContainer = document.getElementById('canvas-container');
-            
-            // Disable button and show spinner
-            submitBtn.disabled = true;
-            spinner.style.display = 'inline-block';
-            resultDiv.textContent = 'Processing...';
-            resultCard.classList.add('processing');
-            canvasContainer.style.display = 'none';
+            progressLog.innerHTML = ''; // Clear previous logs
+            logProgress('Step 1: Starting Resume Analysis...');
+            analysisResultsContainer.style.display = 'none';
+            step2FormDiv.style.display = 'none'; // Hide step 2 form
             
             const formData = new FormData();
             formData.append('resume', document.getElementById('resume').files[0]);
             
-            // Add job description file if selected
+            try {
+                const response = await fetch('http://localhost:8000/api/resume/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                logProgress('Step 1: Analysis Complete!', 'complete');
+                analysisResultsDiv.textContent = JSON.stringify(data.analysis, null, 2);
+                analysisResultsContainer.style.display = 'block';
+
+                // Store the key and show Step 2
+                resumeAnalysisKeyInput.value = data.resume_analysis_key;
+                step2FormDiv.style.display = 'block';
+
+                // Pre-fill answers textarea with questions for convenience
+                if (data.analysis && data.analysis.follow_up_questions && Array.isArray(data.analysis.follow_up_questions)) {
+                    answersTextarea.value = "Answers:\n\n" + data.analysis.follow_up_questions.map((q, i) => `${i + 1}. ${q}\n\n`).join('');
+                    answersTextarea.focus(); // Focus on answers
+                }
+
+
+            } catch (error) {
+                logProgress(`Step 1 Error: ${error.message}`, 'error');
+                analysisResultsDiv.textContent = `Error: ${error.message}`;
+                analysisResultsContainer.style.display = 'block';
+                console.error('Analysis Error:', error);
+            }
+        });
+
+        // --- Step 2: Optimize Resume ---
+        optimizeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            logProgress('Step 2: Starting Resume Optimization Flow...');
+            optimizationResultsContainer.style.display = 'none';
+            optimizationResultsDiv.textContent = ''; // Clear previous optimization results
+
+            const formData = new FormData();
+            formData.append('resume_analysis_key', resumeAnalysisKeyInput.value);
+            formData.append('answers', document.getElementById('answers').value);
+            formData.append('additional_info', document.getElementById('additional_info').value);
+
             const jobDescFile = document.getElementById('job_description').files[0];
             if (jobDescFile) {
                 formData.append('job_description', jobDescFile);
             }
-            
-            formData.append('additional_info', document.getElementById('additional_info').value);
             
             try {
                 const response = await fetch('http://localhost:8000/api/resume/optimize', {
@@ -532,416 +240,64 @@
                     body: formData
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
+                if (!response.ok || !response.body) {
+                     const errorText = await response.text();
+                    throw new Error(`Optimization request failed: ${response.status} - ${errorText}`);
                 }
                 
-                // Handle server-sent events
+                optimizationResultsContainer.style.display = 'block'; // Show container for streaming results
+
+                // Handle Server-Sent Events
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                resultDiv.textContent = '';
-                
-                let resumeData = null;
                 
                 while (true) {
                     const { value, done } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        logProgress('Step 2: Optimization Flow Finished.', 'complete');
+                        break;
+                    }
                     
                     const text = decoder.decode(value);
-                    const events = text.split('\n\n').filter(line => line.trim() !== '');
+                    // Process potentially multiple events in one chunk
+                    const events = text.split('\n\n').filter(line => line.trim().startsWith('data: '));
                     
                     for (const event of events) {
-                        if (event.startsWith('data: ')) {
-                            try {
-                                const eventData = JSON.parse(event.substring(6));
-                                resultDiv.textContent += JSON.stringify(eventData, null, 2) + '\n\n';
-                                console.log(eventData);
-                                // Check if this is the completion message
-                                if (eventData.type === "task_complete" && eventData.task === "optimized_resume") {
-                                    // Find the resume data event
-                                        console.log("lets go");
-                                        try {
-                                            const taskCompleteData = eventData.data;
-                                            console.log(taskCompleteData);
-                                            if (taskCompleteData && taskCompleteData.optimized_resume) {
-                                                resumeData = taskCompleteData.optimized_resume;
-                                                generateResumeVisualization(resumeData);
-                                            }
-                                        } catch (parseError) {
-                                            console.error('Error parsing resume data:', parseError);
-                                        }
+                         try {
+                            const eventData = JSON.parse(event.substring(6)); // Remove 'data: ' prefix
+                            // Log progress updates
+                            if (eventData.type === 'status') {
+                                logProgress(`Step 2: ${eventData.message}`);
+                            } else if (eventData.type === 'task_complete') {
+                                logProgress(`Step 2: Task '${eventData.task}' completed.`, 'complete');
+                                // Display final result if it's the optimization task
+                                if (eventData.task === 'optimized_resume') {
+                                    optimizationResultsDiv.textContent = JSON.stringify(eventData.data, null, 2);
                                 }
-                            } catch (e) {
-                                console.error('Error parsing event data:', e);
-                                resultDiv.textContent += event + '\n\n';
+                            } else if (eventData.type === 'complete') {
+                                logProgress(`Step 2: ${eventData.message || 'Flow Complete'}`, 'complete');
+                            } else if (eventData.type === 'error') {
+                                logProgress(`Step 2 Error: ${eventData.message || 'Unknown error'}`, 'error');
+                                optimizationResultsDiv.textContent += `\nERROR: ${eventData.message || 'Unknown error'}`;
                             }
+                            // Optionally display intermediate data in results
+                            // optimizationResultsDiv.textContent += JSON.stringify(eventData, null, 2) + '\n\n';
+
+                        } catch (e) {
+                            console.error('Error parsing SSE event data:', e, 'Raw event:', event);
+                            logProgress('Step 2: Error processing stream data.', 'error');
                         }
                     }
                 }
+
             } catch (error) {
-                resultDiv.textContent = `Error: ${error.message}`;
-                console.error('Error:', error);
-            } finally {
-                // Re-enable button and hide spinner
-                submitBtn.disabled = false;
-                spinner.style.display = 'none';
-                resultCard.classList.remove('processing');
+                logProgress(`Step 2 Error: ${error.message}`, 'error');
+                optimizationResultsDiv.textContent = `Error: ${error.message}`;
+                optimizationResultsContainer.style.display = 'block';
+                console.error('Optimization Error:', error);
             }
         });
-        
-        // Canvas visualization and download
-        function generateResumeVisualization(resumeData) {
-            if (!resumeData) return;
-            
-            const canvas = document.getElementById('resume-canvas');
-            const ctx = canvas.getContext('2d');
-            const canvasContainer = document.getElementById('canvas-container');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            
-            // Show the canvas container
-            canvasContainer.style.display = 'block';
-            
-            // Canvas dimensions
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            // Colors based on theme
-            const bgColor = isDarkMode ? '#1f2937' : '#ffffff';
-            const textColor = isDarkMode ? '#f3f4f6' : '#1f2937';
-            const accentColor = '#6366f1';
-            const secondaryColor = isDarkMode ? '#374151' : '#f3f4f6';
-            const lightAccent = isDarkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)';
-            
-            // Clear canvas
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, width, height);
-            
-            // Add decorative elements
-            for (let i = 0; i < 8; i++) {
-                ctx.fillStyle = lightAccent;
-                ctx.beginPath();
-                ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 100 + 30, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            // Draw header background
-            const gradient = ctx.createLinearGradient(0, 0, width, 0);
-            gradient.addColorStop(0, '#6366f1');
-            gradient.addColorStop(1, '#4f46e5');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, 180);
-            
-            // Draw header pattern
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            for (let i = 0; i < 30; i++) {
-                const x = Math.random() * width;
-                const y = Math.random() * 180;
-                const size = Math.random() * 15 + 5;
-                ctx.fillRect(x, y, size, size);
-            }
-            
-            // Draw header text
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 48px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Optimized Resume', width / 2, 100);
-            
-            // Add a subtle subheading
-            ctx.font = '20px Inter, sans-serif';
-            ctx.fillText('Tailored for your next opportunity', width / 2, 140);
-            
-            // Draw summary section
-            let yPosition = 240;
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 32px Inter, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('Professional Summary', 50, yPosition);
-            
-            // Draw underline
-            ctx.fillStyle = accentColor;
-            ctx.fillRect(50, yPosition + 15, 280, 4);
-            
-            // Draw summary text
-            yPosition += 60;
-            ctx.fillStyle = textColor;
-            ctx.font = '18px Inter, sans-serif';
-            const summaryLines = wrapText(ctx, resumeData.summary, width - 100, 28);
-            
-            summaryLines.forEach(line => {
-                ctx.fillText(line, 50, yPosition);
-                yPosition += 28;
-            });
-            
-            // Draw skills section
-            yPosition += 70;
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 32px Inter, sans-serif';
-            ctx.fillText('Key Skills', 50, yPosition);
-            
-            // Draw underline
-            ctx.fillStyle = accentColor;
-            ctx.fillRect(50, yPosition + 15, 150, 4);
-            
-            // Draw skills as pills
-            yPosition += 60;
-            const skillsPerRow = 3;
-            const skillWidth = (width - 120) / skillsPerRow;
-            
-            // Calculate number of skill rows needed
-            const skillRows = Math.ceil(resumeData.skills.length / skillsPerRow);
-            
-            for (let i = 0; i < resumeData.skills.length; i++) {
-                const row = Math.floor(i / skillsPerRow);
-                const col = i % skillsPerRow;
-                const skill = resumeData.skills[i];
-                
-                const x = 50 + col * skillWidth;
-                const y = yPosition + row * 65;
-                
-                // Draw skill pill background with gradient
-                const skillGradient = ctx.createLinearGradient(x, y, x + skillWidth - 30, y);
-                skillGradient.addColorStop(0, secondaryColor);
-                skillGradient.addColorStop(1, isDarkMode ? '#2a3441' : '#f9fafb');
-                ctx.fillStyle = skillGradient;
-                roundRect(ctx, x, y, skillWidth - 30, 45, 22, true, false);
-                
-                // Add a subtle border
-                ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-                ctx.lineWidth = 1.5;
-                roundRect(ctx, x, y, skillWidth - 30, 45, 22, false, true);
-                
-                // Draw skill text
-                ctx.fillStyle = textColor;
-                ctx.font = 'bold 16px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(skill, x + (skillWidth - 30) / 2, y + 30);
-            }
-            
-            // Calculate next section position
-            yPosition += skillRows * 65 + 70;
-            
-            // Draw experience section
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 32px Inter, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('Experience Highlights', 50, yPosition);
-            
-            // Draw underline
-            ctx.fillStyle = accentColor;
-            ctx.fillRect(50, yPosition + 15, 280, 4);
-            
-            // Draw experience entries
-            yPosition += 60;
-            const experienceLimit = Math.min(3, resumeData.experience.length);
-            
-            for (let i = 0; i < experienceLimit; i++) {
-                const exp = resumeData.experience[i];
-                
-                // Draw experience card background
-                ctx.fillStyle = lightAccent;
-                roundRect(ctx, 50, yPosition - 15, width - 100, 180, 15, true, false);
-                
-                // Add left accent bar
-                ctx.fillStyle = accentColor;
-                ctx.fillRect(50, yPosition - 15, 6, 180);
-                
-                // Role and company
-                ctx.fillStyle = textColor;
-                ctx.font = 'bold 24px Inter, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(`${exp.role} at ${exp.company}`, 80, yPosition + 25);
-                
-                // Duration
-                ctx.fillStyle = isDarkMode ? '#9ca3af' : '#6b7280';
-                ctx.font = '18px Inter, sans-serif';
-                ctx.fillText(exp.duration, 80, yPosition + 60);
-                
-                // Draw achievements (now showing two achievements if available)
-                if (exp.achievements && exp.achievements.length > 0) {
-                    ctx.fillStyle = textColor;
-                    ctx.font = '16px Inter, sans-serif';
-                    
-                    // First achievement
-                    const achievement1Lines = wrapText(ctx, '• ' + exp.achievements[0], width - 200, 24);
-                    achievement1Lines.forEach((line, index) => {
-                        ctx.fillText(line, 80, yPosition + 95 + (index * 24));
-                    });
-                    
-                    // Second achievement if available
-                    if (exp.achievements.length > 1) {
-                        const startY = yPosition + 95 + (achievement1Lines.length * 24) + 10;
-                        const achievement2Lines = wrapText(ctx, '• ' + exp.achievements[1], width - 200, 24);
-                        achievement2Lines.forEach((line, index) => {
-                            ctx.fillText(line, 80, startY + (index * 24));
-                        });
-                    }
-                }
-                
-                yPosition += 210;
-            }
-            
-            // Add certifications if available
-            if (resumeData.certifications && resumeData.certifications.length > 0) {
-                yPosition += 30;
-                ctx.fillStyle = textColor;
-                ctx.font = 'bold 32px Inter, sans-serif';
-                ctx.fillText('Certifications', 50, yPosition);
-                
-                // Draw underline
-                ctx.fillStyle = accentColor;
-                ctx.fillRect(50, yPosition + 15, 180, 4);
-                
-                yPosition += 60;
-                const certLimit = Math.min(5, resumeData.certifications.length);
-                
-                for (let i = 0; i < certLimit; i++) {
-                    ctx.fillStyle = lightAccent;
-                    roundRect(ctx, 50, yPosition - 15, width - 100, 50, 10, true, false);
-                    
-                    ctx.fillStyle = textColor;
-                    ctx.font = 'bold 18px Inter, sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(`• ${resumeData.certifications[i]}`, 80, yPosition + 15);
-                    yPosition += 70;
-                }
-            }
-            
-            // Add education if available
-            if (resumeData.education && resumeData.education.length > 0) {
-                yPosition += 30;
-                ctx.fillStyle = textColor;
-                ctx.font = 'bold 32px Inter, sans-serif';
-                ctx.fillText('Education', 50, yPosition);
-                
-                // Draw underline
-                ctx.fillStyle = accentColor;
-                ctx.fillRect(50, yPosition + 15, 150, 4);
-                
-                yPosition += 60;
-                const eduLimit = Math.min(2, resumeData.education.length);
-                
-                for (let i = 0; i < eduLimit; i++) {
-                    ctx.fillStyle = lightAccent;
-                    roundRect(ctx, 50, yPosition - 15, width - 100, 60, 10, true, false);
-                    
-                    ctx.fillStyle = textColor;
-                    ctx.font = '18px Inter, sans-serif';
-                    ctx.textAlign = 'left';
-                    
-                    // Split education text if it's too long
-                    const eduLines = wrapText(ctx, resumeData.education[i], width - 160, 24);
-                    eduLines.forEach((line, index) => {
-                        ctx.fillText(line, 80, yPosition + 10 + (index * 24));
-                    });
-                    
-                    yPosition += 80;
-                }
-            }
-            
-            // Add a decorative element at the bottom
-            const footerGradient = ctx.createLinearGradient(0, height - 100, width, height - 100);
-            footerGradient.addColorStop(0, '#4f46e5');
-            footerGradient.addColorStop(1, '#6366f1');
-            ctx.fillStyle = footerGradient;
-            ctx.fillRect(0, height - 100, width, 100);
-            
-            // Add decorative dots to footer
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            for (let i = 0; i < 50; i++) {
-                const x = Math.random() * width;
-                const y = height - 100 + Math.random() * 100;
-                const radius = Math.random() * 5 + 1;
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            // Add text to decorative element
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Ready for your next opportunity!', width / 2, height - 60);
-            
-            // Add date
-            const today = new Date();
-            const dateStr = today.toLocaleDateString();
-            ctx.font = '16px Inter, sans-serif';
-            ctx.fillText(`Generated on ${dateStr}`, width / 2, height - 30);
-            
-            // Set up the download button
-            document.getElementById('download-btn').removeEventListener('click', downloadCanvas);
-            document.getElementById('download-btn').addEventListener('click', downloadCanvas);
-        }
-        
-        // Function to download canvas as image
-        function downloadCanvas() {
-            const canvas = document.getElementById('resume-canvas');
-            
-            // Create a temporary link
-            const link = document.createElement('a');
-            link.download = 'optimized-resume.png';
-            link.href = canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        
-        // Helper function to wrap text
-        function wrapText(context, text, maxWidth, lineHeight) {
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = words[0];
-            
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const width = context.measureText(currentLine + ' ' + word).width;
-                
-                if (width < maxWidth) {
-                    currentLine += ' ' + word;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
-                }
-            }
-            
-            lines.push(currentLine);
-            return lines;
-        }
-        
-        // Helper function to draw rounded rectangles
-        function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-            if (typeof stroke === 'undefined') {
-                stroke = true;
-            }
-            if (typeof radius === 'undefined') {
-                radius = 5;
-            }
-            if (typeof radius === 'number') {
-                radius = {tl: radius, tr: radius, br: radius, bl: radius};
-            } else {
-                const defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
-                for (let side in defaultRadius) {
-                    radius[side] = radius[side] || defaultRadius[side];
-                }
-            }
-            ctx.beginPath();
-            ctx.moveTo(x + radius.tl, y);
-            ctx.lineTo(x + width - radius.tr, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-            ctx.lineTo(x + width, y + height - radius.br);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-            ctx.lineTo(x + radius.bl, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-            ctx.lineTo(x, y + radius.tl);
-            ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-            ctx.closePath();
-            if (fill) {
-                ctx.fill();
-            }
-            if (stroke) {
-                ctx.stroke();
-            }
-        }
+
     </script>
 </body>
 </html> 

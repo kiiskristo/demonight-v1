@@ -13,9 +13,11 @@ import tempfile
 import shutil
 import uvicorn
 import logging
+import json
 from .crew import HowDoYouFindMeCrew
 from .tools.resume_tools import CacheStorageTool, resume_tool
 from .clean_json import clean_and_parse_json
+from crewai import Crew, Process
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

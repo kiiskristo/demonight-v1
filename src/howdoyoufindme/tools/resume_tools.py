@@ -11,6 +11,9 @@ from pydantic import BaseModel, Field
 import logging
 import mimetypes
 
+# Add logger instantiation here
+logger = logging.getLogger(__name__)
+
 try:
     import PyPDF2
     PDF_SUPPORT = True
@@ -38,15 +41,22 @@ class CacheInput(BaseModel):
 
 def get_file_content(file_path: str) -> str:
     """Extract text from various file formats"""
+    logger.info(f"[get_file_content] Processing file: {file_path}")
     if not os.path.exists(file_path):
-        return f"Error: File {file_path} not found"
+        error_msg = f"Error: File {file_path} not found"
+        logger.error(f"[get_file_content] {error_msg}")
+        return error_msg
     
     # Determine file type
     file_type = mimetypes.guess_type(file_path)[0]
     
     # Handle different file types
     if file_type == 'application/pdf' and PDF_SUPPORT:
-        return extract_pdf_text(file_path)
+        logger.info("[get_file_content] Attempting PDF extraction.")
+        result = extract_pdf_text(file_path)
+        if result.startswith("Error:"):
+             logger.warning(f"[get_file_content] PDF extraction failed: {result}")
+        return result
     elif file_type in ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'] and DOCX_SUPPORT:
         return extract_docx_text(file_path)
     else:
@@ -83,27 +93,40 @@ def extract_docx_text(file_path: str) -> str:
 
 def resume_document_tool(file_path: str) -> str:
     """Extract text and structure from resume files in PDF or Word format"""
-    logging.info(f"Reading resume file: {file_path}")
-    
+    logger.info(f"[resume_document_tool] Attempting to read file: {file_path}")
+
     if not os.path.exists(file_path):
-        error_msg = f"Error: File {file_path} not found"
-        logging.error(error_msg)
+        error_msg = f"Error: File not found at path: {file_path}"
+        logger.error(f"[resume_document_tool] {error_msg}")
         return error_msg
-    
-    # Get file info
-    file_size = os.path.getsize(file_path)
-    file_type = mimetypes.guess_type(file_path)[0] or "unknown"
-    
-    logging.info(f"File exists: {os.path.basename(file_path)}, Size: {file_size} bytes, Type: {file_type}")
-    
-    # Extract content based on file type
-    content = get_file_content(file_path)
-    
-    # If content is too long, truncate it
-    if len(content) > 10000:
-        content = content[:10000] + "... [content truncated]"
-    
-    return content
+
+    try:
+        # Get file info
+        file_size = os.path.getsize(file_path)
+        file_type = mimetypes.guess_type(file_path)[0] or "unknown"
+        logger.info(f"[resume_document_tool] File exists: {os.path.basename(file_path)}, Size: {file_size} bytes, Type: {file_type}")
+
+        # Extract content based on file type
+        content = get_file_content(file_path)
+
+        # Check if content extraction failed (returned an error message)
+        if content.startswith("Error:"):
+             logger.error(f"[resume_document_tool] Content extraction failed: {content}")
+             return content
+
+        # Log success and truncate if necessary
+        logger.info(f"[resume_document_tool] Successfully extracted content (length: {len(content)}).")
+        if len(content) > 10000:
+            content = content[:10000] + "... [content truncated]"
+            logger.info("[resume_document_tool] Content truncated.")
+
+        # Return the actual content if successful
+        return content
+
+    except Exception as e:
+        error_msg = f"Error: Unexpected exception in resume_document_tool for {file_path}: {str(e)}"
+        logger.error(f"[resume_document_tool] {error_msg}", exc_info=True)
+        return error_msg
 
 class JobSearchTool:
     """Tool for searching job information online"""
