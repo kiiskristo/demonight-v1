@@ -12,9 +12,10 @@ import os
 from ..clean_json import clean_and_parse_json
 from ..crew import HowDoYouFindMeCrew
 from ..tools.resume_tools import CacheStorageTool
+import tempfile
 
 class ResumeOptimizerState(FlowState):
-    resume_path: str
+    resume_content: str
     job_description: Optional[str] = None
     additional_info: Optional[str] = None
     resume_analysis: Optional[Dict[str, Any]] = None
@@ -23,28 +24,23 @@ class ResumeOptimizerState(FlowState):
     optimized_resume: Optional[Dict[str, Any]] = None
 
 class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
-    def __init__(self, resume_path: str, user_answers: str, job_description_content: str | None = None, additional_info: str | None = None):
+    def __init__(self, resume_content: str, user_answers: str, job_description_content: str | None = None, additional_info: str | None = None):
         """
         Initializes the flow.
 
         Args:
-            resume_path: Path to the resume file.
+            resume_content: The resume content as a string.
             user_answers: User's answers to follow-up questions.
             job_description_content: Content of the job description file, if provided.
             additional_info: Additional information provided by the user.
         """
-        self.resume_path = resume_path
+        self.resume_content = resume_content
         self.user_answers = user_answers
         self.job_description_content = job_description_content
         self.additional_info = additional_info
 
-        # Validate resume path exists
-        if not os.path.exists(resume_path):
-            logging.error(f"Invalid resume path: {resume_path}")
-            raise ValueError("Invalid resume path")
-
         self.initial_state = ResumeOptimizerState(
-            resume_path=resume_path,
+            resume_content=resume_content,
             job_description=self.job_description_content,
             additional_info=self.additional_info
         )
@@ -110,7 +106,8 @@ class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
     async def analyze_resume(self):
         """Start by analyzing the resume"""
         try:
-            result = self.resume_analyzer_crew.kickoff(inputs={"file_path": self.state.resume_path})
+            # Pass resume content directly to the agent
+            result = self.resume_analyzer_crew.kickoff(inputs={"resume_content": self.state.resume_content})
             if hasattr(result.tasks_output[0], 'raw'):
                 data = self._extract_json_from_response(result.tasks_output[0].raw)
                 if data:

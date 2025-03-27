@@ -182,33 +182,18 @@ async def optimize_resume_flow(
 ):
     logger.info("Resume optimization flow called")
     
-    temp_dir = tempfile.mkdtemp()
     try:
-        # Save resume content to a temporary file
-        resume_path = os.path.join(temp_dir, "resume.txt")
-        with open(resume_path, "w", encoding="utf-8") as f:
-            f.write(resume_content)
-        logger.info(f"Resume content saved to: {resume_path}")
-
-        # Save job description if provided
-        job_description_path = None
+        # Read job description content if provided
+        job_description_content = None
         if job_description:
-            job_description_path = os.path.join(temp_dir, job_description.filename)
-            with open(job_description_path, "wb") as buffer:
-                shutil.copyfileobj(job_description.file, buffer)
-            logger.info(f"Job description saved to: {job_description_path}")
+            job_description_content = (await job_description.read()).decode('utf-8', errors='ignore')
+            logger.info("Job description content read successfully")
 
         # Define the generator for the streaming response
         async def event_generator() -> AsyncGenerator[str, None]:
-            # Read job description content if file exists
-            job_description_content = None
-            if job_description_path and os.path.exists(job_description_path):
-                with open(job_description_path, 'r', encoding='utf-8') as f:
-                    job_description_content = f.read()
-
-            # Initialize the flow with the resume path and other data
+            # Initialize the flow with the resume content and other data
             flow = ResumeOptimizerFlow(
-                resume_path=resume_path,
+                resume_content=resume_content,
                 user_answers=answers,
                 job_description_content=job_description_content,
                 additional_info=additional_info
@@ -231,10 +216,6 @@ async def optimize_resume_flow(
     except Exception as e:
         logger.error(f"Error in optimization flow endpoint: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error optimizing resume: {str(e)}")
-    finally:
-        # Clean up temp directory
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        logger.info(f"Cleaned up temporary directory: {temp_dir}")
 
 # Run the app with uvicorn when this script is executed directly
 if __name__ == "__main__":
