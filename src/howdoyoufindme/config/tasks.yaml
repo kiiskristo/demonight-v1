@@ -1,0 +1,116 @@
+# src/howdoyoufindme/config/tasks.yaml
+
+analyze_resume_task:
+  description: >
+    Analyze the resume document provided at '{file_path}':
+    1. Extract key information (skills, experience, education, certifications)
+    2. Identify strengths and weaknesses in the resume
+    3. Create a list of follow-up questions to fill information gaps
+    4. Store analysis in cache for future reference
+  expected_output: >
+    {
+      "profile": {
+        "skills": ["List of skills"],
+        "experience": ["Work experience details"],
+        "education": ["Education details"],
+        "certifications": ["Certifications if any"]
+      },
+      "strengths": ["List of resume strengths"],
+      "weaknesses": ["Areas that could be improved"],
+      "follow_up_questions": ["Questions to fill information gaps"]
+    }
+  agent: resume_analyzer_agent
+
+build_profile_task:
+  description: >
+    Build a comprehensive professional profile based on the provided information.
+    The resume analysis is stored in cache with the key '{resume_analysis_key}'.
+    Use the cache_storage_tool to retrieve it with the action "retrieve".
+    
+    Also consider any additional information provided: '{additional_info}'
+    
+    Steps:
+    1. Create a comprehensive professional profile
+    2. Incorporate answers to follow-up questions
+    3. Organize information in a structured format for future matching
+  expected_output: >
+    {
+      "complete_profile": {
+        "professional_summary": "Concise professional summary",
+        "skills": {
+          "technical": ["Technical skills"],
+          "soft": ["Soft skills"],
+          "domain": ["Domain-specific expertise"]
+        },
+        "experience": [
+          {
+            "role": "Job title",
+            "company": "Company name",
+            "duration": "Time period",
+            "highlights": ["Key achievements"]
+          }
+        ],
+        "education": ["Education details"],
+        "certifications": ["Certification details"],
+        "additional_info": "Any other relevant information"
+      }
+    }
+  agent: profile_builder_agent
+  context: [analyze_resume_task]
+
+research_job_task:
+  description: >
+    Research the job and company using the provided job description: '{job_description}'
+    The user profile is stored in cache with the key '{user_profile_key}'.
+    Use the cache_storage_tool to retrieve it with the action "retrieve".
+    
+    Steps:
+    1. Extract key job requirements and qualifications
+    2. Research the company online to understand culture and values
+    3. Identify industry trends relevant to the position
+    4. Determine hidden requirements not explicitly stated
+  expected_output: >
+    {
+      "job_profile": {
+        "title": "Job title",
+        "company": "Company name",
+        "key_requirements": ["List of explicit requirements"],
+        "hidden_requirements": ["Inferred requirements"],
+        "company_culture": "Description of company culture",
+        "industry_trends": ["Relevant industry trends"]
+      }
+    }
+  agent: job_researcher_agent
+
+optimize_resume_task:
+  description: >
+    Create an optimized resume based on all available information.
+    The user profile is stored in cache with the key '{user_profile_key}'.
+    The job profile is stored in cache with the key '{job_profile_key}'.
+    Use the cache_storage_tool to retrieve both with the action "retrieve".
+    
+    Steps:
+    1. Highlight relevant skills and experience for the specific job
+    2. Tailor language to match job description keywords
+    3. Structure resume according to best practices for the industry
+    4. Generate a professional summary aligned with job requirements
+  expected_output: >
+    {
+      "optimized_resume": {
+        "summary": "Tailored professional summary",
+        "skills": ["Highlighted skills relevant to job"],
+        "experience": [
+          {
+            "role": "Job title",
+            "company": "Company name",
+            "duration": "Time period",
+            "achievements": ["Tailored achievements"]
+          }
+        ],
+        "education": ["Relevant education details"],
+        "certifications": ["Relevant certification details"],
+        "additional_sections": "Any other relevant sections"
+      }
+    }
+  agent: resume_optimizer_agent
+  context: [build_profile_task, research_job_task]

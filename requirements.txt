@@ -1,0 +1,38 @@
+# Core dependencies
+crewai
+langchain-community>=0.0.10
+langchain-openai>=0.0.2
+langchain-core>=0.1.4
+fastapi>=0.104.1
+uvicorn>=0.24.0
+python-dotenv>=1.0.0
+pydantic>=2.5.2
+
+# HTTP client for FastAPI
+httpx>=0.24.1
+
+# CORS middleware
+fastapi-cors>=0.0.6
+
+# JSON processing
+orjson>=3.9.10
+
+# Async support
+aiohttp>=3.9.1
+
+# Production server
+gunicorn>=21.2.0
+uvicorn[standard]>=0.24.0
+
+# Required for BingSearchAPIWrapper
+requests>=2.31.0
+
+# Required for resume parsing
+beautifulsoup4>=4.12.2
+python-multipart>=0.0.6  # For handling file uploads in FastAPI
+langchain>=0.1.0  # For LangChain tools
+PyPDF2>=3.0.0  # For PDF parsing
+python-docx>=0.8.11  # For DOCX parsing
+
+# Logging
+python-json-logger>=2.0.7  # Add this for structured JSON logging

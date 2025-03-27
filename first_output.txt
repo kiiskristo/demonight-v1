@@ -1,0 +1,58 @@
+{
+  "type": "task_complete",
+  "task": "optimized_resume",
+  "data": {
+    "optimized_resume": {
+      "summary": "Detail-oriented and results-driven Product Manager with a strong background in business analysis and healthcare technology. Experienced in facilitating agile ceremonies and effectively managing product backlogs to enhance user experience and operational efficiency. Proven ability to document business requirements and deliver data-driven solutions in fast-paced environments.",
+      "skills": [
+        "Product Management",
+        "Agile Methodologies",
+        "Analytics Implementation",
+        "Backlog Management and Prioritization",
+        "Business Analysis",
+        "User-Centered Design"
+      ],
+      "experience": [
+        {
+          "role": "Product Manager",
+          "company": "Hear.com",
+          "duration": "January 2024 to Present",
+          "achievements": [
+            "Lead the implementation of Provider Recommendation Service, enhancing provider engagement.",
+            "Reduced operational costs by $150,000/year and increased revenue by $5.7 million.",
+            "Facilitated agile ceremonies including sprint planning and stand-ups to drive team productivity."
+          ]
+        },
+        {
+          "role": "Associate Product Manager",
+          "company": "Hear.com",
+          "duration": "January 2022 to December 2023",
+          "achievements": [
+            "Spearheaded the development of a unified payment platform integrating multiple APIs for streamlined operations.",
+            "Improved EBITDA by over $200,000/year with a 95% user adoption rate, demonstrating strong analytical skills.",
+            "Actively participated in backlog grooming and prioritization sessions, ensuring alignment with business goals."
+          ]
+        },
+        {
+          "role": "ERP Support Specialist",
+          "company": "Hear.com",
+          "duration": "November 2020 to January 2022",
+          "achievements": [
+            "Reduced Microsoft Dynamics NAV issue resolution time, enhancing system productivity.",
+            "Gathered and documented requirements to implement new features effectively."
+          ]
+        }
+      ],
+      "education": [
+        "Bachelor of Business Administration – Finance from Florida International University (FIU), Miami, FL."
+      ],
+      "certifications": [],
+      "additional_sections": "Some extra stuff, I am cool. Passionate about continuous learning and adapting to new technologies to drive product innovation."
+    }
+  }
+}
+
+{
+  "type": "complete",
+  "message": "Resume optimization complete"
+}

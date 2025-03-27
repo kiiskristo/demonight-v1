@@ -1,0 +1,15 @@
+# Python-related
+.env
+venv/
+__pycache__/
+
+# Coverage
+.coverage
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Lock files (if auto-generated and not needed in repo)
+uv.lock
