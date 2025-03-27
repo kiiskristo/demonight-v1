@@ -8,6 +8,7 @@ import json
 import asyncio
 import logging
 import re
+import os
 from ..clean_json import clean_and_parse_json
 from ..crew import HowDoYouFindMeCrew
 from ..tools.resume_tools import CacheStorageTool
@@ -22,11 +23,30 @@ class ResumeOptimizerState(FlowState):
     optimized_resume: Optional[Dict[str, Any]] = None
 
 class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
-    def __init__(self, resume_path: str, job_description: Optional[str] = None, additional_info: Optional[str] = None):
+    def __init__(self, resume_path: str, user_answers: str, job_description_content: str | None = None, additional_info: str | None = None):
+        """
+        Initializes the flow.
+
+        Args:
+            resume_path: Path to the resume file.
+            user_answers: User's answers to follow-up questions.
+            job_description_content: Content of the job description file, if provided.
+            additional_info: Additional information provided by the user.
+        """
+        self.resume_path = resume_path
+        self.user_answers = user_answers
+        self.job_description_content = job_description_content
+        self.additional_info = additional_info
+
+        # Validate resume path exists
+        if not os.path.exists(resume_path):
+            logging.error(f"Invalid resume path: {resume_path}")
+            raise ValueError("Invalid resume path")
+
         self.initial_state = ResumeOptimizerState(
             resume_path=resume_path,
-            job_description=job_description,
-            additional_info=additional_info
+            job_description=self.job_description_content,
+            additional_info=self.additional_info
         )
         super().__init__()
         self._initialize_crew()
@@ -104,22 +124,13 @@ class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
     async def build_user_profile(self, resume_analysis):
         """Build user profile from resume analysis and additional info"""
         try:
-            # Convert resume_analysis to string for JSON serialization if needed
             inputs = {
+                "resume_analysis": resume_analysis,
+                "user_answers": self.user_answers,
                 "additional_info": self.state.additional_info or ""
             }
             
-            # For debugging
             logging.info(f"Building user profile...")
-            
-            # Store resume analysis in cache first so the agent can retrieve it
-            cache_key = "resume_analysis_" + str(hash(str(resume_analysis)))
-            cache_tool = CacheStorageTool()
-            cache_tool.run("store", cache_key, resume_analysis)
-            logging.info(f"Stored resume analysis in cache with key: {cache_key}")
-            
-            # Add the cache key to the inputs
-            inputs["resume_analysis_key"] = cache_key
             
             result = self.profile_builder_crew.kickoff(inputs=inputs)
             if hasattr(result.tasks_output[0], 'raw'):
@@ -129,7 +140,6 @@ class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
                     return data
         except Exception as e:
             logging.error(f"Error in build_user_profile: {str(e)}")
-            # Log the stack trace for debugging
             import traceback
             logging.error(traceback.format_exc())
         return None
@@ -141,15 +151,9 @@ class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
             return None
             
         try:
-            # Store user profile in cache
-            cache_key = "user_profile_" + str(hash(str(user_profile)))
-            cache_tool = CacheStorageTool()
-            cache_tool.run("store", cache_key, user_profile)
-            logging.info(f"Stored user profile in cache with key: {cache_key}")
-            
             inputs = {
                 "job_description": self.state.job_description,
-                "user_profile_key": cache_key
+                "user_profile": user_profile
             }
             logging.info(f"Researching job with description length: {len(self.state.job_description)}")
             
@@ -167,20 +171,9 @@ class ResumeOptimizerFlow(Flow[ResumeOptimizerState]):
     async def optimize_resume(self, job_profile):
         """Create optimized resume based on user profile and job details"""
         try:
-            # Store job profile in cache
-            job_cache_key = "job_profile_" + str(hash(str(job_profile)))
-            user_cache_key = "user_profile_" + str(hash(str(self.state.user_profile)))
-            
-            cache_tool = CacheStorageTool()
-            cache_tool.run("store", job_cache_key, job_profile)
-            cache_tool.run("store", user_cache_key, self.state.user_profile)
-            
-            logging.info(f"Stored profiles in cache with keys: {job_cache_key}, {user_cache_key}")
-            
-            # Prepare inputs for the task
             inputs = {
-                "user_profile_key": user_cache_key,
-                "job_profile_key": job_cache_key
+                "user_profile": self.state.user_profile,
+                "job_profile": job_profile if job_profile else None
             }
             
             logging.info("Optimizing resume with profiles")

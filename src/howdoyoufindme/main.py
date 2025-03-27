@@ -130,6 +130,10 @@ async def analyze_resume_endpoint(
             shutil.copyfileobj(resume.file, buffer)
         logger.info(f"Resume saved to temporary path: {resume_path}")
 
+        # Read the resume content
+        with open(resume_path, "rb") as f:
+            resume_content = f.read()
+
         # Initialize only the necessary crew components
         crew_instance = HowDoYouFindMeCrew()
         resume_analyzer_crew = Crew(
@@ -140,7 +144,6 @@ async def analyze_resume_endpoint(
         )
 
         # Kick off the analysis task
-        # Note: Ensure the analyze_resume_task uses 'file_path' as input key
         result = resume_analyzer_crew.kickoff(inputs={"file_path": resume_path})
 
         analysis_data = None
@@ -153,17 +156,10 @@ async def analyze_resume_endpoint(
              logger.error("Failed to parse analysis data from the agent.")
              raise HTTPException(status_code=500, detail="Failed to analyze resume data.")
 
-        # Cache the result
-        cache_tool_instance = CacheStorageTool()
-        # Use a hash of the data or a UUID for a unique key
-        cache_key = f"resume_analysis_{hash(json.dumps(analysis_data, sort_keys=True))}"
-        cache_tool_instance.run(action="store", key=cache_key, data=analysis_data)
-        logger.info(f"Analysis result cached with key: {cache_key}")
-
-        # Add the cache key to the response
+        # Return both the analysis and the resume content
         response_data = {
             "analysis": analysis_data,
-            "resume_analysis_key": cache_key
+            "resume_content": resume_content.decode('utf-8', errors='ignore')  # Convert bytes to string
         }
 
         return response_data
@@ -178,19 +174,24 @@ async def analyze_resume_endpoint(
 
 @app.post("/api/resume/optimize")
 async def optimize_resume_flow(
-    resume_analysis_key: str = Form(...),
-    answers: str = Form(...), # Assuming answers are provided as a single string for now
+    resume_content: str = Form(...),  # The resume content as string
+    answers: str = Form(...),  # User's answers to questions
     job_description: Optional[UploadFile] = File(None),
-    additional_info: Optional[str] = Form(None), # Keep this if needed
-    recaptcha_token: Optional[str] = Form(None) # Keep recaptcha if needed
+    additional_info: Optional[str] = Form(None),
+    recaptcha_token: Optional[str] = Form(None)
 ):
-    logger.info(f"Resume optimization flow called with key: {resume_analysis_key}")
-    # ... (Optional: reCAPTCHA verification) ...
-
+    logger.info("Resume optimization flow called")
+    
     temp_dir = tempfile.mkdtemp()
-    job_description_path = None
     try:
-        # Save job description file if provided
+        # Save resume content to a temporary file
+        resume_path = os.path.join(temp_dir, "resume.txt")
+        with open(resume_path, "w", encoding="utf-8") as f:
+            f.write(resume_content)
+        logger.info(f"Resume content saved to: {resume_path}")
+
+        # Save job description if provided
+        job_description_path = None
         if job_description:
             job_description_path = os.path.join(temp_dir, job_description.filename)
             with open(job_description_path, "wb") as buffer:
@@ -199,18 +200,23 @@ async def optimize_resume_flow(
 
         # Define the generator for the streaming response
         async def event_generator() -> AsyncGenerator[str, None]:
-            # Initialize the flow with the key and answers
+            # Read job description content if file exists
+            job_description_content = None
+            if job_description_path and os.path.exists(job_description_path):
+                with open(job_description_path, 'r', encoding='utf-8') as f:
+                    job_description_content = f.read()
+
+            # Initialize the flow with the resume path and other data
             flow = ResumeOptimizerFlow(
-                resume_analysis_key=resume_analysis_key,
-                answers=answers,
-                job_description_path=job_description_path, # Pass the path
+                resume_path=resume_path,
+                user_answers=answers,
+                job_description_content=job_description_content,
                 additional_info=additional_info
             )
             async for event in flow.stream_optimization():
                 yield event
-                await asyncio.sleep(0) # Yield control briefly
+                await asyncio.sleep(0)
 
-        # Return the streaming response
         return StreamingResponse(
             event_generator(),
             media_type="text/event-stream",
@@ -226,10 +232,9 @@ async def optimize_resume_flow(
         logger.error(f"Error in optimization flow endpoint: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error optimizing resume: {str(e)}")
     finally:
-        # Clean up temp directory if job description was saved
-        if job_description_path:
-             shutil.rmtree(temp_dir, ignore_errors=True)
-             logger.info(f"Cleaned up temporary directory: {temp_dir}")
+        # Clean up temp directory
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        logger.info(f"Cleaned up temporary directory: {temp_dir}")
 
 # Run the app with uvicorn when this script is executed directly
 if __name__ == "__main__":

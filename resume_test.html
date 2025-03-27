@@ -10,293 +10,449 @@
             display: flex;
             height: 100vh;
             margin: 0;
+            overflow: hidden; /* Prevent body scroll */
         }
-        #progress-panel {
-            width: 30%;
-            background-color: #f0f0f0;
+        #progress-panel { /* Left Panel for Logs */
+            width: 40%; /* Slightly wider for logs */
+            background-color: #282c34; /* Darker background */
+            color: #abb2bf; /* Lighter text */
             padding: 20px;
-            border-right: 1px solid #ccc;
-            overflow-y: auto;
+            border-right: 1px solid #444;
+            overflow-y: auto; /* Scrollable */
+            font-family: 'Courier New', Courier, monospace; /* Monospace for logs */
+            font-size: 0.9em;
         }
-        #content-panel {
-            width: 70%;
-            padding: 20px;
-            overflow-y: auto;
+        #content-panel { /* Right Panel for Interaction */
+            width: 60%;
+            padding: 30px;
+            overflow-y: auto; /* Scrollable */
+        }
+        /* Step Containers - Only one visible at a time */
+        .step-container {
+            display: none; /* Hidden by default */
+        }
+        .step-container.active {
+            display: block; /* Show active step */
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #333;
         }
         input[type="file"], textarea, input[type="text"] {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             box-sizing: border-box;
             margin-bottom: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
         }
         textarea {
-            min-height: 100px;
+            min-height: 80px; /* Smaller default */
+            resize: vertical;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #007bff; /* Blue */
             color: white;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1em;
             margin-top: 10px;
+            transition: background-color 0.2s ease;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
-        #analysis-results, #optimization-results {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            background-color: #f9f9f9;
-            white-space: pre-wrap; /* Preserve formatting */
-            max-height: 400px;
-            overflow-y: auto;
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
         .file-upload-info {
-            font-size: 12px;
+            font-size: 0.85em;
             color: #666;
             margin-top: 5px;
         }
-        #step2-form {
-            display: none; /* Hidden initially */
-            margin-top: 30px;
-            border-top: 2px solid #eee;
-            padding-top: 20px;
+        #questions-container .question-item {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        #questions-container .question-item label {
+            font-weight: normal; /* Question text normal weight */
+            color: #555;
+            margin-bottom: 10px;
+        }
+        #optimization-results-display {
+             margin-top: 20px;
+             border: 1px solid #ddd;
+             padding: 15px;
+             background-color: #fdfdfd;
+             white-space: pre-wrap;
+             max-height: 60vh; /* Limit height */
+             overflow-y: auto;
+             border-radius: 4px;
+        }
+        /* Progress Log Styling */
+        #progress-log {
+             line-height: 1.4;
         }
         .progress-item {
-            padding: 5px 0;
-            border-bottom: 1px dashed #ccc;
+            padding: 3px 0;
+            border-bottom: 1px solid #3a3f4a; /* Darker border */
+            word-wrap: break-word; /* Wrap long lines */
         }
-        .progress-item.complete {
-            color: green;
-            font-weight: bold;
+        .progress-item:last-child {
+            border-bottom: none;
         }
-        .progress-item.error {
-            color: red;
-            font-weight: bold;
-        }
-        h1, h2, h3 {
-            margin-top: 0;
-        }
+        .progress-item.status { color: #61afef; } /* Blue for status */
+        .progress-item.complete { color: #98c379; } /* Green for complete */
+        .progress-item.error { color: #e06c75; font-weight: bold;} /* Red for error */
+        .progress-item.data { color: #dcdcdc; font-size: 0.85em; padding-left: 15px;} /* Lighter for data */
+
+        h1, h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;}
     </style>
 </head>
 <body>
+    <!-- Left Panel: Progress Log -->
     <div id="progress-panel">
-        <h2>Progress</h2>
+        <h2>Log / Debug Output</h2>
         <div id="progress-log">
-            <div class="progress-item">Waiting to start...</div>
+            <div class="progress-item status">Waiting to start...</div>
         </div>
     </div>
 
+    <!-- Right Panel: Content -->
     <div id="content-panel">
+        <!-- Hidden input to store the analysis key -->
+        <input type="hidden" id="resume_analysis_key" name="resume_analysis_key">
+
         <!-- Step 1: Analyze Resume -->
-        <div id="step1">
+        <div id="step1-analyze" class="step-container active">
             <h1>Step 1: Analyze Resume</h1>
             <form id="analyzeForm">
                 <div class="form-group">
                     <label for="resume">Upload Resume (PDF/Word):</label>
                     <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
-                        </div>
-                <button type="submit">Analyze Resume</button>
-            </form>
-            <div id="analysis-results-container" style="display: none;">
-                <h3>Analysis Results:</h3>
-                <div id="analysis-results"></div>
-                    </div>
-                    </div>
-
-        <!-- Step 2: Provide Answers and Optimize -->
-        <div id="step2-form">
-            <h2>Step 2: Provide Answers & Optimize</h2>
-            <form id="optimizeForm">
-                <input type="hidden" id="resume_analysis_key" name="resume_analysis_key">
-
-                <div class="form-group">
-                    <label for="answers">Answers to Questions:</label>
-                    <textarea id="answers" name="answers" placeholder="Provide answers to the questions generated in Step 1..." required></textarea>
                 </div>
-                
+                <button type="submit" id="analyzeButton">Analyze Resume</button>
+            </form>
+        </div>
+
+        <!-- Step 2: Answer Questions -->
+        <div id="step2-questions" class="step-container">
+            <h1>Step 2: Answer Questions</h1>
+            <form id="questionsForm">
+                <div id="questions-container">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+                <button type="submit" id="submitAnswersButton">Submit Answers</button>
+            </form>
+        </div>
+
+        <!-- Step 3: Provide Job Details (Optional) -->
+        <div id="step3-details" class="step-container">
+            <h1>Step 3: Provide Job Details (Optional)</h1>
+            <form id="detailsForm">
                 <div class="form-group">
                     <label for="job_description">Job Description (Optional Text File):</label>
                     <input type="file" id="job_description" name="job_description" accept=".txt">
                     <div class="file-upload-info">Upload a .txt file containing the job description</div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="additional_info">Additional Information (Optional):</label>
                     <textarea id="additional_info" name="additional_info" placeholder="Any other relevant information about yourself..."></textarea>
                 </div>
-                
-                <button type="submit">Optimize Resume</button>
+
+                <button type="submit" id="optimizeButton">Optimize Resume</button>
             </form>
-            <div id="optimization-results-container" style="display: none;">
-                <h3>Optimization Results:</h3>
-                <div id="optimization-results"></div>
-            </div>
         </div>
+
+        <!-- Step 4: Show Optimization Results -->
+        <div id="step4-results" class="step-container">
+             <h1>Step 4: Optimization Results</h1>
+             <div id="optimization-results-display">Waiting for results...</div>
+             <button id="resetButton" style="margin-top: 20px; background-color: #6c757d;">Start Over</button>
+        </div>
+
     </div>
 
     <script>
-        const analyzeForm = document.getElementById('analyzeForm');
-        const optimizeForm = document.getElementById('optimizeForm');
+        // DOM Elements
         const progressLog = document.getElementById('progress-log');
-        const analysisResultsContainer = document.getElementById('analysis-results-container');
-        const analysisResultsDiv = document.getElementById('analysis-results');
-        const optimizationResultsContainer = document.getElementById('optimization-results-container');
-        const optimizationResultsDiv = document.getElementById('optimization-results');
-        const step2FormDiv = document.getElementById('step2-form');
+        const analyzeForm = document.getElementById('analyzeForm');
+        const questionsForm = document.getElementById('questionsForm'); // New form for questions
+        const detailsForm = document.getElementById('detailsForm'); // New form for details
+        const questionsContainer = document.getElementById('questions-container');
+        const optimizationResultsDiv = document.getElementById('optimization-results-display');
         const resumeAnalysisKeyInput = document.getElementById('resume_analysis_key');
-        const answersTextarea = document.getElementById('answers'); // Get the answers textarea
+        const analyzeButton = document.getElementById('analyzeButton');
+        const submitAnswersButton = document.getElementById('submitAnswersButton'); // New button
+        const optimizeButton = document.getElementById('optimizeButton');
+        const resetButton = document.getElementById('resetButton');
 
-        function logProgress(message, type = 'info') {
+        const step1Div = document.getElementById('step1-analyze');
+        const step2Div = document.getElementById('step2-questions');
+        const step3Div = document.getElementById('step3-details'); // New step div
+        const step4Div = document.getElementById('step4-results'); // Renamed step div
+
+        // State variable to hold answers between steps
+        let userAnswers = [];
+
+        // --- Utility Functions ---
+        function logProgress(message, type = 'status', data = null) {
             const item = document.createElement('div');
-            item.classList.add('progress-item');
-            item.textContent = message;
-            if (type === 'complete') {
-                item.classList.add('complete');
-            } else if (type === 'error') {
-                item.classList.add('error');
+            item.classList.add('progress-item', type);
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            if (data) {
+                const dataItem = document.createElement('div');
+                dataItem.classList.add('progress-item', 'data');
+                let dataStr = JSON.stringify(data, null, 2);
+                if (dataStr.length > 1000) {
+                    dataStr = dataStr.substring(0, 1000) + '... [truncated]';
+                }
+                dataItem.textContent = dataStr;
+                item.appendChild(dataItem);
             }
-            // Prepend to show latest first
             progressLog.insertBefore(item, progressLog.firstChild);
         }
 
-        // --- Step 1: Analyze Resume ---
+        function showStep(stepToShow) {
+            // Include the new step3Div
+            [step1Div, step2Div, step3Div, step4Div].forEach(step => {
+                step.classList.remove('active');
+            });
+            stepToShow.classList.add('active');
+        }
+
+        function disableButton(button, disabled = true) {
+            button.disabled = disabled;
+        }
+
+        // --- Event Listeners ---
+
+        // Step 1: Analyze Resume
         analyzeForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            progressLog.innerHTML = ''; // Clear previous logs
+            progressLog.innerHTML = ''; // Clear logs
             logProgress('Step 1: Starting Resume Analysis...');
-            analysisResultsContainer.style.display = 'none';
-            step2FormDiv.style.display = 'none'; // Hide step 2 form
-            
+            disableButton(analyzeButton);
+
             const formData = new FormData();
-            formData.append('resume', document.getElementById('resume').files[0]);
-            
+            const resumeFile = document.getElementById('resume').files[0];
+            if (!resumeFile) {
+                logProgress('Step 1 Error: No resume file selected.', 'error');
+                disableButton(analyzeButton, false);
+                return;
+            }
+            formData.append('resume', resumeFile);
+
             try {
                 const response = await fetch('http://localhost:8000/api/resume/analyze', {
                     method: 'POST',
                     body: formData
                 });
 
+                const responseData = await response.json();
+
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
+                    throw new Error(`Analysis failed: ${response.status} - ${responseData.detail || JSON.stringify(responseData)}`);
                 }
 
-                const data = await response.json();
+                logProgress('Step 1: Analysis Complete!', 'complete', responseData.analysis);
 
-                logProgress('Step 1: Analysis Complete!', 'complete');
-                analysisResultsDiv.textContent = JSON.stringify(data.analysis, null, 2);
-                analysisResultsContainer.style.display = 'block';
+                // Store both analysis and resume content in localStorage
+                localStorage.setItem('resume_analysis', JSON.stringify(responseData.analysis));
+                localStorage.setItem('resume_content', responseData.resume_content);
 
-                // Store the key and show Step 2
-                resumeAnalysisKeyInput.value = data.resume_analysis_key;
-                step2FormDiv.style.display = 'block';
+                // Populate questions
+                questionsContainer.innerHTML = ''; // Clear previous questions
+                if (responseData.analysis && responseData.analysis.follow_up_questions && Array.isArray(responseData.analysis.follow_up_questions)) {
+                    responseData.analysis.follow_up_questions.forEach((q, index) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('question-item');
 
-                // Pre-fill answers textarea with questions for convenience
-                if (data.analysis && data.analysis.follow_up_questions && Array.isArray(data.analysis.follow_up_questions)) {
-                    answersTextarea.value = "Answers:\n\n" + data.analysis.follow_up_questions.map((q, i) => `${i + 1}. ${q}\n\n`).join('');
-                    answersTextarea.focus(); // Focus on answers
+                        const qLabel = document.createElement('label');
+                        qLabel.htmlFor = `answer-${index}`;
+                        qLabel.textContent = `${index + 1}. ${q}`;
+
+                        const qTextarea = document.createElement('textarea');
+                        qTextarea.id = `answer-${index}`;
+                        qTextarea.name = `answer_${index}`;
+                        qTextarea.rows = 3;
+
+                        itemDiv.appendChild(qLabel);
+                        itemDiv.appendChild(qTextarea);
+                        questionsContainer.appendChild(itemDiv);
+                    });
+                } else {
+                    questionsContainer.innerHTML = '<p>No follow-up questions generated. Proceeding to next step.</p>';
                 }
 
+                // Move to Step 2 (Questions)
+                showStep(step2Div);
 
             } catch (error) {
                 logProgress(`Step 1 Error: ${error.message}`, 'error');
-                analysisResultsDiv.textContent = `Error: ${error.message}`;
-                analysisResultsContainer.style.display = 'block';
                 console.error('Analysis Error:', error);
+                disableButton(analyzeButton, false);
             }
         });
 
-        // --- Step 2: Optimize Resume ---
-        optimizeForm.addEventListener('submit', async function(e) {
+        // Step 2: Submit Answers
+        questionsForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            logProgress('Step 2: Starting Resume Optimization Flow...');
-            optimizationResultsContainer.style.display = 'none';
-            optimizationResultsDiv.textContent = ''; // Clear previous optimization results
+            logProgress('Step 2: Answers Submitted.');
+            disableButton(submitAnswersButton);
 
+            // Collect answers
+            userAnswers = []; // Clear previous answers
+            const answerTextareas = questionsContainer.querySelectorAll('textarea');
+            answerTextareas.forEach(textarea => {
+                userAnswers.push(textarea.value);
+            });
+
+            logProgress('Step 2: Collected answers.', 'data', userAnswers);
+
+            // Move to Step 3 (Details)
+            showStep(step3Div);
+            disableButton(submitAnswersButton, false); // Re-enable in case user goes back
+        });
+
+
+        // Step 3: Submit Details & Optimize
+        detailsForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            logProgress('Step 3: Starting Resume Optimization Flow...');
+            disableButton(optimizeButton);
+            showStep(step4Div); // Show results area immediately
+            optimizationResultsDiv.textContent = 'Processing...'; // Placeholder
+
+            // Collect answers
+            const answers = [];
+            const answerTextareas = questionsContainer.querySelectorAll('textarea');
+            answerTextareas.forEach(textarea => {
+                answers.push(textarea.value);
+            });
+            // Simple join for now, might need better structuring depending on agent needs
+            const answersString = answers.map((ans, i) => `Answer ${i+1}:\n${ans}`).join('\n\n');
+
+            // Get resume content from localStorage
+            const resumeContent = localStorage.getItem('resume_content');
+            if (!resumeContent) {
+                logProgress('Step 3 Error: Resume content not found in localStorage.', 'error');
+                return;
+            }
+
+            // Create FormData and append all fields
             const formData = new FormData();
-            formData.append('resume_analysis_key', resumeAnalysisKeyInput.value);
-            formData.append('answers', document.getElementById('answers').value);
-            formData.append('additional_info', document.getElementById('additional_info').value);
+            formData.append('resume_content', resumeContent);  // Send as string
+            formData.append('answers', answersString);
+            
+            // Add additional info if provided
+            const additionalInfo = document.getElementById('additional_info').value;
+            if (additionalInfo) {
+                formData.append('additional_info', additionalInfo);
+            }
 
+            // Add job description file if provided
             const jobDescFile = document.getElementById('job_description').files[0];
             if (jobDescFile) {
                 formData.append('job_description', jobDescFile);
+                logProgress('Step 3: Job Description file included.');
+            } else {
+                logProgress('Step 3: No Job Description file provided.');
             }
-            
+
             try {
                 const response = await fetch('http://localhost:8000/api/resume/optimize', {
                     method: 'POST',
                     body: formData
                 });
-                
-                if (!response.ok || !response.body) {
-                     const errorText = await response.text();
+
+                if (!response.ok) {
+                    const errorText = await response.text();
                     throw new Error(`Optimization request failed: ${response.status} - ${errorText}`);
                 }
-                
-                optimizationResultsContainer.style.display = 'block'; // Show container for streaming results
 
-                // Handle Server-Sent Events
+                if (!response.body) {
+                    throw new Error('Response body is null');
+                }
+
+                // Handle Server-Sent Events for streaming results
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                
+                optimizationResultsDiv.textContent = ''; // Clear placeholder
+
                 while (true) {
                     const { value, done } = await reader.read();
                     if (done) {
-                        logProgress('Step 2: Optimization Flow Finished.', 'complete');
+                        logProgress('Step 3: Optimization Flow Finished.', 'complete');
                         break;
                     }
-                    
+
                     const text = decoder.decode(value);
-                    // Process potentially multiple events in one chunk
                     const events = text.split('\n\n').filter(line => line.trim().startsWith('data: '));
-                    
+
                     for (const event of events) {
-                         try {
-                            const eventData = JSON.parse(event.substring(6)); // Remove 'data: ' prefix
-                            // Log progress updates
+                        try {
+                            const eventData = JSON.parse(event.substring(6));
                             if (eventData.type === 'status') {
-                                logProgress(`Step 2: ${eventData.message}`);
+                                logProgress(`Step 3: ${eventData.message}`, 'status');
                             } else if (eventData.type === 'task_complete') {
-                                logProgress(`Step 2: Task '${eventData.task}' completed.`, 'complete');
-                                // Display final result if it's the optimization task
+                                logProgress(`Step 3: Task '${eventData.task}' completed.`, 'complete', eventData.data);
                                 if (eventData.task === 'optimized_resume') {
-                                    optimizationResultsDiv.textContent = JSON.stringify(eventData.data, null, 2);
+                                    optimizationResultsDiv.textContent = JSON.stringify(eventData.data?.optimized_resume || eventData.data, null, 2);
                                 }
                             } else if (eventData.type === 'complete') {
-                                logProgress(`Step 2: ${eventData.message || 'Flow Complete'}`, 'complete');
+                                logProgress(`Step 3: ${eventData.message || 'Flow Complete'}`, 'complete');
                             } else if (eventData.type === 'error') {
-                                logProgress(`Step 2 Error: ${eventData.message || 'Unknown error'}`, 'error');
-                                optimizationResultsDiv.textContent += `\nERROR: ${eventData.message || 'Unknown error'}`;
+                                logProgress(`Step 3 Error: ${eventData.message || 'Unknown error'}`, 'error');
+                                optimizationResultsDiv.textContent += `\n\nERROR: ${eventData.message || 'Unknown error'}`;
                             }
-                            // Optionally display intermediate data in results
-                            // optimizationResultsDiv.textContent += JSON.stringify(eventData, null, 2) + '\n\n';
-
                         } catch (e) {
                             console.error('Error parsing SSE event data:', e, 'Raw event:', event);
-                            logProgress('Step 2: Error processing stream data.', 'error');
+                            logProgress('Step 3: Error processing stream data.', 'error');
                         }
                     }
                 }
 
             } catch (error) {
-                logProgress(`Step 2 Error: ${error.message}`, 'error');
+                logProgress(`Step 3 Error: ${error.message}`, 'error');
                 optimizationResultsDiv.textContent = `Error: ${error.message}`;
-                optimizationResultsContainer.style.display = 'block';
                 console.error('Optimization Error:', error);
+            } finally {
+                resetButton.style.display = 'inline-block';
             }
         });
+
+        // Reset Button
+        resetButton.addEventListener('click', () => {
+            showStep(step1Div);
+            analyzeForm.reset();
+            questionsForm.reset(); // Reset questions form
+            detailsForm.reset(); // Reset details form
+            questionsContainer.innerHTML = '';
+            optimizationResultsDiv.textContent = 'Waiting for results...';
+            progressLog.innerHTML = '<div class="progress-item status">Waiting to start...</div>';
+            userAnswers = []; // Clear stored answers
+            // Clear localStorage
+            localStorage.removeItem('resume_analysis');
+            localStorage.removeItem('resume_content');
+            disableButton(analyzeButton, false);
+            disableButton(submitAnswersButton, false);
+            disableButton(optimizeButton, false);
+        });
+
+        // Initial setup
+        showStep(step1Div); // Start at Step 1
 
     </script>
 </body>
